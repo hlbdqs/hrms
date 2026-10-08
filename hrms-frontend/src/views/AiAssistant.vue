@@ -2,6 +2,7 @@
 import { ref, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
 import { aiChat, aiGenerate } from '../api/ai'
+import { hasAuthority, isAdmin } from '../utils/auth'
 
 // ---- 问答区 ----
 const messages = ref([])
@@ -42,7 +43,8 @@ function scrollToBottom() {
 }
 
 // ---- 生成区 ----
-const genType = ref('review')
+const isEmployeeOnly = hasAuthority('ROLE_EMPLOYEE') && !isAdmin() && !hasAuthority('ROLE_HR')
+const genType = ref(isEmployeeOnly ? 'weekly' : 'review')
 const genContent = ref('')
 const genResult = ref('')
 const generating = ref(false)
@@ -100,9 +102,9 @@ async function handleGenerate() {
           <el-form label-width="60px">
             <el-form-item label="类型">
               <el-select v-model="genType" style="width: 100%">
-                <el-option label="绩效评语" value="review" />
+                <el-option v-if="!isEmployeeOnly" label="绩效评语" value="review" />
                 <el-option label="周报" value="weekly" />
-                <el-option label="岗位 JD" value="jd" />
+                <el-option v-if="!isEmployeeOnly" label="岗位 JD" value="jd" />
               </el-select>
             </el-form-item>
             <el-form-item label="内容">
