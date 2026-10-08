@@ -4,6 +4,7 @@ import com.hrms.common.PageResult;
 import com.hrms.common.Result;
 import com.hrms.entity.Employee;
 import com.hrms.service.EmployeeService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,6 +29,7 @@ public class EmployeeController {
     }
 
     /** 分页 + 关键字查询 */
+    @PreAuthorize("hasAuthority('employee:read')")
     @GetMapping
     public Result<PageResult<Employee>> page(
             @RequestParam(defaultValue = "1") int page,
@@ -37,24 +39,28 @@ public class EmployeeController {
     }
 
     /** 按 ID 查询 */
+    @PreAuthorize("hasAuthority('employee:read')")
     @GetMapping("/{id}")
     public Result<Employee> getById(@PathVariable Long id) {
         return Result.ok(employeeService.getById(id));
     }
 
     /** 新增 */
+    @PreAuthorize("hasAuthority('employee:write')")
     @PostMapping
     public Result<Employee> create(@RequestBody Employee employee) {
         return Result.ok(employeeService.create(employee));
     }
 
     /** 更新 */
+    @PreAuthorize("hasAuthority('employee:write')")
     @PutMapping("/{id}")
     public Result<Employee> update(@PathVariable Long id, @RequestBody Employee employee) {
         return Result.ok(employeeService.update(id, employee));
     }
 
-    /** 删除 */
+    /** 删除（仅管理员） */
+    @PreAuthorize("hasAuthority('employee:delete')")
     @DeleteMapping("/{id}")
     public Result<Void> delete(@PathVariable Long id) {
         employeeService.delete(id);

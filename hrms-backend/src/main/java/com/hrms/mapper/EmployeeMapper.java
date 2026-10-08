@@ -49,10 +49,13 @@ public interface EmployeeMapper {
     @Select("SELECT * FROM employee WHERE id = #{id}")
     Employee selectById(@Param("id") Long id);
 
-    @Insert("INSERT INTO employee(employee_no, name, gender, phone, email, department_id, status) " +
-            "VALUES(#{employeeNo}, #{name}, #{gender}, #{phone}, #{email}, #{departmentId}, #{status})")
+    @Insert("INSERT INTO employee(employee_no, name, username, password, gender, phone, email, department_id, status) " +
+            "VALUES(#{employeeNo}, #{name}, #{username}, #{password}, #{gender}, #{phone}, #{email}, #{departmentId}, #{status})")
     @Options(useGeneratedKeys = true, keyProperty = "id")
     int insert(Employee employee);
+
+    @Select("SELECT * FROM employee WHERE username = #{username}")
+    Employee selectByUsername(@Param("username") String username);
 
     @Update("UPDATE employee SET employee_no = #{employeeNo}, name = #{name}, gender = #{gender}, " +
             "phone = #{phone}, email = #{email}, department_id = #{departmentId}, status = #{status} " +

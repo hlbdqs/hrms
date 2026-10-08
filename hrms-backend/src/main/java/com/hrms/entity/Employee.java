@@ -1,5 +1,7 @@
 package com.hrms.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.time.LocalDateTime;
 
 /**
@@ -10,6 +12,9 @@ public class Employee {
     private Long id;
     private String employeeNo;
     private String name;
+    private String username;
+    @JsonIgnore
+    private String password;
     private Integer gender;
     private String phone;
     private String email;
@@ -40,6 +45,22 @@ public class Employee {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public Integer getGender() {
