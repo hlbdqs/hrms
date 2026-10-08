@@ -1,0 +1,26 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    # createDatabaseIfNotExist=true：首次运行自动创建 hrms 数据库
+    url: jdbc:mysql://localhost:3306/hrms?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=utf8&allowPublicKeyRetrieval=true
+    username: root
+    password: CHANGE_ME_PASSWORD
+  sql:
+    init:
+      # 每次启动执行 schema.sql（脚本为幂等，可重复执行）
+      mode: always
+      schema-locations: classpath:db/schema.sql
+      encoding: utf-8
+
+mybatis:
+  configuration:
+    # 数据库下划线命名 -> Java 驼峰命名 自动映射
+    map-underscore-to-camel-case: true
+  type-aliases-package: com.hrms.entity
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
