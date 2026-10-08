@@ -49,7 +49,6 @@ async function handleLogin() {
         </el-form-item>
         <el-button type="primary" class="submit" :loading="loading" @click="handleLogin">登录</el-button>
       </el-form>
-      <p class="hint">演示账号：admin / admin123（管理员） · hr / hr123（人事） · user / user123（普通员工）</p>
     </el-card>
   </div>
 </template>
@@ -77,11 +76,5 @@ async function handleLogin() {
 }
 .submit {
   width: 100%;
-}
-.hint {
-  margin-top: 16px;
-  font-size: 12px;
-  color: #c0c4cc;
-  line-height: 1.6;
 }
 </style>
