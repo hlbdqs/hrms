@@ -1,8 +1,11 @@
 package com.hrms.controller;
 
 import com.hrms.common.Result;
+import com.hrms.dto.ChangePasswordRequest;
 import com.hrms.dto.LoginRequest;
 import com.hrms.dto.LoginResponse;
+import com.hrms.entity.Employee;
+import com.hrms.mapper.EmployeeMapper;
 import com.hrms.security.JwtUtil;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -10,7 +13,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,10 +31,15 @@ public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
+    private final EmployeeMapper employeeMapper;
+    private final PasswordEncoder passwordEncoder;
 
-    public AuthController(AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
+    public AuthController(AuthenticationManager authenticationManager, JwtUtil jwtUtil,
+                          EmployeeMapper employeeMapper, PasswordEncoder passwordEncoder) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
+        this.employeeMapper = employeeMapper;
+        this.passwordEncoder = passwordEncoder;
     }
 
     /** 登录：校验用户名密码，签发 JWT */
@@ -56,5 +66,27 @@ public class AuthController {
             // 统一返回友好提示，不泄露具体是用户名错还是密码错
             return Result.fail(401, "用户名或密码错误");
         }
+    }
+
+    /** 修改当前登录用户密码（需已登录，校验原密码后 BCrypt 加密入库） */
+    @PutMapping("/password")
+    public Result<Void> changePassword(@RequestBody ChangePasswordRequest request, Authentication authentication) {
+        if (request.getOldPassword() == null || request.getOldPassword().isBlank()) {
+            return Result.fail(400, "原密码不能为空");
+        }
+        if (request.getNewPassword() == null || request.getNewPassword().length() < 6 || request.getNewPassword().length() > 100) {
+            return Result.fail(400, "新密码长度须为 6-100");
+        }
+
+        String username = authentication.getName();
+        Employee employee = employeeMapper.selectByUsername(username);
+        if (employee == null) {
+            return Result.fail(404, "用户不存在");
+        }
+        if (!passwordEncoder.matches(request.getOldPassword(), employee.getPassword())) {
+            return Result.fail(400, "原密码错误");
+        }
+        employeeMapper.updatePassword(employee.getId(), passwordEncoder.encode(request.getNewPassword()));
+        return Result.ok();
     }
 }

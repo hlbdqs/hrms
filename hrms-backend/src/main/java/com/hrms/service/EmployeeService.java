@@ -8,7 +8,7 @@ import com.hrms.entity.Employee;
  */
 public interface EmployeeService {
 
-    PageResult<Employee> page(int page, int size, String keyword);
+    PageResult<Employee> page(int page, int size, String keyword, Long departmentId);
 
     Employee getById(Long id);
 

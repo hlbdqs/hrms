@@ -22,7 +22,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public PageResult<Employee> page(int page, int size, String keyword) {
+    public PageResult<Employee> page(int page, int size, String keyword, Long departmentId) {
         if (page < 1) {
             page = 1;
         }
@@ -30,8 +30,8 @@ public class EmployeeServiceImpl implements EmployeeService {
             size = 10;
         }
         int offset = (page - 1) * size;
-        long total = employeeMapper.count(keyword);
-        List<Employee> list = employeeMapper.selectPage(keyword, offset, size);
+        long total = employeeMapper.count(keyword, departmentId);
+        List<Employee> list = employeeMapper.selectPage(keyword, departmentId, offset, size);
         return new PageResult<>(total, list);
     }
 

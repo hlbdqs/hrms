@@ -21,8 +21,9 @@ async function handleLogin() {
       // 注意：此处为演示将 token 存 localStorage；生产建议 httpOnly Cookie 或内存短期存储
       localStorage.setItem('token', res.data.token)
       localStorage.setItem('username', res.data.username)
+      localStorage.setItem('authorities', JSON.stringify(res.data.authorities || []))
       ElMessage.success('登录成功')
-      emit('success', res.data.username)
+      emit('success', res.data.username, res.data.authorities || [])
     } else {
       ElMessage.error(res.message || '登录失败')
     }

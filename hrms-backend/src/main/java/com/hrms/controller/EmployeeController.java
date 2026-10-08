@@ -34,8 +34,9 @@ public class EmployeeController {
     public Result<PageResult<Employee>> page(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String keyword) {
-        return Result.ok(employeeService.page(page, size, keyword));
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Long departmentId) {
+        return Result.ok(employeeService.page(page, size, keyword, departmentId));
     }
 
     /** 按 ID 查询 */

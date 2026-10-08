@@ -5,6 +5,7 @@ import { getEmployeePage, createEmployee, updateEmployee, deleteEmployee } from 
 import { getDepartments } from '../api/department'
 
 const keyword = ref('')
+const filterDepartmentId = ref(null)
 const page = ref(1)
 const size = ref(10)
 const total = ref(0)
@@ -39,7 +40,7 @@ const statusMap = { 0: '离职', 1: '在职' }
 async function loadData() {
   loading.value = true
   try {
-    const res = await getEmployeePage({ page: page.value, size: size.value, keyword: keyword.value })
+    const res = await getEmployeePage({ page: page.value, size: size.value, keyword: keyword.value, departmentId: filterDepartmentId.value })
     if (res.code === 200) {
       list.value = res.data.list
       total.value = res.data.total
@@ -67,6 +68,7 @@ function handleSearch() {
 
 function handleReset() {
   keyword.value = ''
+  filterDepartmentId.value = null
   page.value = 1
   loadData()
 }
@@ -149,9 +151,18 @@ onMounted(() => {
           v-model="keyword"
           placeholder="姓名 / 工号 / 手机号 / 邮箱"
           clearable
-          style="width: 280px"
+          style="width: 260px"
           @keyup.enter="handleSearch"
         />
+        <el-select
+          v-model="filterDepartmentId"
+          placeholder="按部门筛选"
+          clearable
+          style="width: 160px"
+          @change="handleSearch"
+        >
+          <el-option v-for="d in departments" :key="d.id" :label="d.name" :value="d.id" />
+        </el-select>
         <el-button type="primary" @click="handleSearch">查询</el-button>
         <el-button @click="handleReset">重置</el-button>
         <div class="spacer"></div>

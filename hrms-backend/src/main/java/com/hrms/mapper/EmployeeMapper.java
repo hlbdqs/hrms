@@ -26,10 +26,14 @@ public interface EmployeeMapper {
             "      OR phone LIKE CONCAT('%', #{keyword}, '%')" +
             "      OR email LIKE CONCAT('%', #{keyword}, '%'))" +
             "  </if>" +
+            "  <if test='departmentId != null'>" +
+            "    AND department_id = #{departmentId}" +
+            "  </if>" +
             "</where>" +
             "ORDER BY id DESC LIMIT #{offset}, #{size}" +
             "</script>")
     List<Employee> selectPage(@Param("keyword") String keyword,
+                              @Param("departmentId") Long departmentId,
                               @Param("offset") int offset,
                               @Param("size") int size);
 
@@ -42,9 +46,12 @@ public interface EmployeeMapper {
             "      OR phone LIKE CONCAT('%', #{keyword}, '%')" +
             "      OR email LIKE CONCAT('%', #{keyword}, '%'))" +
             "  </if>" +
+            "  <if test='departmentId != null'>" +
+            "    AND department_id = #{departmentId}" +
+            "  </if>" +
             "</where>" +
             "</script>")
-    long count(@Param("keyword") String keyword);
+    long count(@Param("keyword") String keyword, @Param("departmentId") Long departmentId);
 
     @Select("SELECT * FROM employee WHERE id = #{id}")
     Employee selectById(@Param("id") Long id);
@@ -56,6 +63,9 @@ public interface EmployeeMapper {
 
     @Select("SELECT * FROM employee WHERE username = #{username}")
     Employee selectByUsername(@Param("username") String username);
+
+    @Update("UPDATE employee SET password = #{password} WHERE id = #{id}")
+    int updatePassword(@Param("id") Long id, @Param("password") String password);
 
     @Update("UPDATE employee SET employee_no = #{employeeNo}, name = #{name}, gender = #{gender}, " +
             "phone = #{phone}, email = #{email}, department_id = #{departmentId}, status = #{status} " +
