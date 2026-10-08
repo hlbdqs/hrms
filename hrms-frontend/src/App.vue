@@ -7,6 +7,7 @@ import EmployeeList from './views/EmployeeList.vue'
 import DepartmentManage from './views/DepartmentManage.vue'
 import RoleManage from './views/RoleManage.vue'
 import LogManage from './views/LogManage.vue'
+import AiAssistant from './views/AiAssistant.vue'
 import { changePassword } from './api/auth'
 
 const username = ref(localStorage.getItem('username') || '')
@@ -67,6 +68,7 @@ async function handleChangePassword() {
         <button :class="{ active: activeTab === 'departments' }" @click="activeTab = 'departments'">部门管理</button>
         <button v-if="isAdmin" :class="{ active: activeTab === 'roles' }" @click="activeTab = 'roles'">角色权限</button>
         <button v-if="isAdmin" :class="{ active: activeTab === 'logs' }" @click="activeTab = 'logs'">审计日志</button>
+        <button :class="{ active: activeTab === 'ai' }" @click="activeTab = 'ai'">AI 助手</button>
       </nav>
       <div class="spacer"></div>
       <span class="user">{{ username }}</span>
@@ -80,6 +82,7 @@ async function handleChangePassword() {
       <DepartmentManage v-else-if="activeTab === 'departments'" />
       <RoleManage v-else-if="activeTab === 'roles'" />
       <LogManage v-else-if="activeTab === 'logs'" />
+      <AiAssistant v-else-if="activeTab === 'ai'" />
     </main>
 
     <el-dialog v-model="pwdDialogVisible" title="修改密码" width="400px">

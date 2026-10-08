@@ -1,9 +1,15 @@
 # 使用说明：
 # 1. 复制本文件为 application-local.yml（与 .example 文件同目录）
-# 2. 填入你本机的真实 MySQL 密码和 JWT 密钥
+# 2. 填入你本机的真实 MySQL 密码、JWT 密钥和 DeepSeek API Key
 # 3. application-local.yml 已被 .gitignore 忽略，不会提交到 Git，避免泄露敏感信息
 spring:
   datasource:
     password: 你的MySQL密码
 jwt:
   secret: 至少32字节的随机密钥（HS256 要求）
+
+# DeepSeek 大模型（AI 助手/文本生成，可选）
+deepseek:
+  api-key: 你的DeepSeek密钥
+  base-url: https://api.deepseek.com
+  model: deepseek-chat
