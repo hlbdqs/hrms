@@ -32,7 +32,7 @@ hrms-backend
 ## 运行前准备
 
 1. 安装 JDK 17、Maven、MySQL（或 Navicat）。
-2. 确保本机 MySQL 已启动，并修改 `application.yml` 中的 `username` / `password` 为你本地的账号密码（默认 root / CHANGE_ME_PASSWORD）。
+2. 确保本机 MySQL 已启动，并配置本机敏感信息（数据库密码、JWT 密钥）：把 `src/main/resources/application-local.yml.example` 复制为同目录下的 `application-local.yml`，填入本机 MySQL 密码（该文件已被 `.gitignore` 忽略，不会提交，避免泄露密码/密钥）。
 3. 首次运行会自动创建 `hrms` 数据库并初始化表与种子数据（`createDatabaseIfNotExist=true` + 幂等 schema.sql）。
 
 ## 运行
