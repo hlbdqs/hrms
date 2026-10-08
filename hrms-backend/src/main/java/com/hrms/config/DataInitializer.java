@@ -25,21 +25,25 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        createAccountIfAbsent("admin", "admin123", "ADMIN", "系统管理员");
-        createAccountIfAbsent("hr", "hr123", "HR", "人事专员");
-        createAccountIfAbsent("user", "user123", "EMPLOYEE", "普通员工");
+        createAccountIfAbsent("admin", "admin123", "ADMIN", "赵建国", "1010", 1, 2L, "13800001010", "zhaojianguo@hrms.com");
+        createAccountIfAbsent("hr", "hr123", "HR", "孙丽华", "1011", 2, 2L, "13800001011", "sunlihua@hrms.com");
+        createAccountIfAbsent("user", "user123", "EMPLOYEE", "周小燕", "1012", 2, 3L, "13800001012", "zhouxiaoyan@hrms.com");
     }
 
-    private void createAccountIfAbsent(String username, String rawPassword, String roleCode, String name) {
+    private void createAccountIfAbsent(String username, String rawPassword, String roleCode, String name,
+                                       String employeeNo, Integer gender, Long departmentId, String phone, String email) {
         if (employeeMapper.selectByUsername(username) != null) {
             return;
         }
         Employee employee = new Employee();
-        employee.setEmployeeNo("EMP_" + username.toUpperCase());
+        employee.setEmployeeNo(employeeNo);
         employee.setName(name);
         employee.setUsername(username);
         employee.setPassword(passwordEncoder.encode(rawPassword));
-        employee.setGender(0);
+        employee.setGender(gender);
+        employee.setDepartmentId(departmentId);
+        employee.setPhone(phone);
+        employee.setEmail(email);
         employee.setStatus(1);
         employeeMapper.insert(employee);
         authMapper.insertEmployeeRole(employee.getId(), roleCode);

@@ -76,9 +76,15 @@ INSERT IGNORE INTO department (id, name, description) VALUES
     (3, '市场部', '负责市场推广');
 
 INSERT IGNORE INTO employee (id, employee_no, name, gender, phone, email, department_id, status) VALUES
-    (1, 'E001', '张三', 1, '13800000001', 'zhangsan@hrms.com', 1, 1),
-    (2, 'E002', '李四', 2, '13800000002', 'lisi@hrms.com', 2, 1),
-    (3, 'E003', '王五', 1, '13800000003', 'wangwu@hrms.com', 1, 1);
+    (1, '1001', '王伟',   1, '13800001001', 'wangwei@hrms.com',   1, 1),
+    (2, '1002', '李娜',   2, '13800001002', 'lina@hrms.com',      1, 1),
+    (3, '1003', '张敏',   2, '13800001003', 'zhangmin@hrms.com',  2, 1),
+    (4, '1004', '刘洋',   1, '13800001004', 'liuyang@hrms.com',   1, 1),
+    (5, '1005', '陈静',   2, '13800001005', 'chenjing@hrms.com',  2, 1),
+    (6, '1006', '杨磊',   1, '13800001006', 'yanglei@hrms.com',   3, 1),
+    (7, '1007', '赵雪',   2, '13800001007', 'zhaoxue@hrms.com',   3, 1),
+    (8, '1008', '黄海',   1, '13800001008', 'huanghai@hrms.com',  1, 1),
+    (9, '1009', '周杰',   1, '13800001009', 'zhoujie@hrms.com',   3, 1);
 
 INSERT IGNORE INTO sys_role (id, code, name, description) VALUES
     (1, 'ADMIN', '管理员', '拥有全部权限'),
