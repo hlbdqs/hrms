@@ -95,13 +95,14 @@ INSERT IGNORE INTO sys_permission (id, code, name) VALUES
     (1, 'employee:read', '查看员工'),
     (2, 'employee:write', '新增/修改员工'),
     (3, 'employee:delete', '删除员工'),
-    (4, 'department:read', '查看部门');
+    (4, 'department:read', '查看部门'),
+    (5, 'department:write', '新增/修改/删除部门');
 
 -- 角色 -> 权限 映射
 INSERT IGNORE INTO role_permission (role_id, permission_id) VALUES
-    (1, 1), (1, 2), (1, 3), (1, 4),   -- ADMIN：全部
-    (2, 1), (2, 2), (2, 4),           -- HR：查看/新增/修改员工、查看部门
-    (3, 1), (3, 4);                   -- EMPLOYEE：查看员工、查看部门
+    (1, 1), (1, 2), (1, 3), (1, 4), (1, 5),  -- ADMIN：全部（含部门管理）
+    (2, 1), (2, 2), (2, 4),                  -- HR：查看/新增/修改员工、查看部门（不可管理部门）
+    (3, 1), (3, 4);                          -- EMPLOYEE：查看员工、查看部门
 
 -- 说明：登录账号（admin/hr/user）由 DataInitializer 在启动时创建，密码经 BCrypt 加密后入库
 

@@ -9,7 +9,7 @@ const loading = ref(false)
 const dialogVisible = ref(false)
 const dialogTitle = ref('新增部门')
 const form = reactive({ id: null, name: '', description: '' })
-const canWrite = hasAuthority('employee:write')
+const canWrite = hasAuthority('department:write')
 
 async function loadData() {
   loading.value = true

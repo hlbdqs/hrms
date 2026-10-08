@@ -35,22 +35,22 @@ public class DepartmentController {
         return Result.ok(departmentService.listAll());
     }
 
-    /** 新增部门（管理员/人事） */
-    @PreAuthorize("hasAuthority('employee:write')")
+    /** 新增部门（仅管理员） */
+    @PreAuthorize("hasAuthority('department:write')")
     @PostMapping
     public Result<Department> create(@RequestBody Department department) {
         return Result.ok(departmentService.create(department));
     }
 
-    /** 更新部门（管理员/人事） */
-    @PreAuthorize("hasAuthority('employee:write')")
+    /** 更新部门（仅管理员） */
+    @PreAuthorize("hasAuthority('department:write')")
     @PutMapping("/{id}")
     public Result<Department> update(@PathVariable Long id, @RequestBody Department department) {
         return Result.ok(departmentService.update(id, department));
     }
 
-    /** 删除部门（管理员/人事） */
-    @PreAuthorize("hasAuthority('employee:write')")
+    /** 删除部门（仅管理员） */
+    @PreAuthorize("hasAuthority('department:write')")
     @DeleteMapping("/{id}")
     public Result<Void> delete(@PathVariable Long id) {
         departmentService.delete(id);
