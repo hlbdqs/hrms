@@ -67,6 +67,9 @@ public interface EmployeeMapper {
     @Update("UPDATE employee SET password = #{password} WHERE id = #{id}")
     int updatePassword(@Param("id") Long id, @Param("password") String password);
 
+    @Select("SELECT * FROM employee ORDER BY id")
+    List<Employee> selectAll();
+
     @Update("UPDATE employee SET employee_no = #{employeeNo}, name = #{name}, gender = #{gender}, " +
             "phone = #{phone}, email = #{email}, department_id = #{departmentId}, status = #{status} " +
             "WHERE id = #{id}")

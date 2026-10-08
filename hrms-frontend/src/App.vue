@@ -2,15 +2,17 @@
 import { ref, reactive, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import Login from './views/Login.vue'
+import Dashboard from './views/Dashboard.vue'
 import EmployeeList from './views/EmployeeList.vue'
 import DepartmentManage from './views/DepartmentManage.vue'
 import RoleManage from './views/RoleManage.vue'
+import LogManage from './views/LogManage.vue'
 import { changePassword } from './api/auth'
 
 const username = ref(localStorage.getItem('username') || '')
 const authorities = ref(JSON.parse(localStorage.getItem('authorities') || '[]'))
 const isAdmin = computed(() => authorities.value.includes('ROLE_ADMIN'))
-const activeTab = ref('employees')
+const activeTab = ref('dashboard')
 
 const pwdDialogVisible = ref(false)
 const pwdForm = reactive({ oldPassword: '', newPassword: '' })
@@ -26,7 +28,7 @@ function handleLogout() {
   localStorage.removeItem('authorities')
   username.value = ''
   authorities.value = []
-  activeTab.value = 'employees'
+  activeTab.value = 'dashboard'
 }
 
 async function handleChangePassword() {
@@ -60,9 +62,11 @@ async function handleChangePassword() {
     <header class="app-header">
       <h1>智能人事管理系统</h1>
       <nav class="nav">
+        <button :class="{ active: activeTab === 'dashboard' }" @click="activeTab = 'dashboard'">仪表盘</button>
         <button :class="{ active: activeTab === 'employees' }" @click="activeTab = 'employees'">员工管理</button>
         <button :class="{ active: activeTab === 'departments' }" @click="activeTab = 'departments'">部门管理</button>
         <button v-if="isAdmin" :class="{ active: activeTab === 'roles' }" @click="activeTab = 'roles'">角色权限</button>
+        <button v-if="isAdmin" :class="{ active: activeTab === 'logs' }" @click="activeTab = 'logs'">审计日志</button>
       </nav>
       <div class="spacer"></div>
       <span class="user">{{ username }}</span>
@@ -71,9 +75,11 @@ async function handleChangePassword() {
     </header>
 
     <main class="app-main">
-      <EmployeeList v-if="activeTab === 'employees'" />
+      <Dashboard v-if="activeTab === 'dashboard'" />
+      <EmployeeList v-else-if="activeTab === 'employees'" />
       <DepartmentManage v-else-if="activeTab === 'departments'" />
       <RoleManage v-else-if="activeTab === 'roles'" />
+      <LogManage v-else-if="activeTab === 'logs'" />
     </main>
 
     <el-dialog v-model="pwdDialogVisible" title="修改密码" width="400px">

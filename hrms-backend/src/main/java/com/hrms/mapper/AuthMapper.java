@@ -1,5 +1,6 @@
 package com.hrms.mapper;
 
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -25,4 +26,13 @@ public interface AuthMapper {
     @Insert("INSERT IGNORE INTO employee_role(employee_id, role_id) " +
             "SELECT #{employeeId}, id FROM sys_role WHERE code = #{roleCode}")
     int insertEmployeeRole(@Param("employeeId") Long employeeId, @Param("roleCode") String roleCode);
+
+    @Select("SELECT role_id FROM employee_role WHERE employee_id = #{employeeId}")
+    List<Long> selectRoleIdsByEmployeeId(@Param("employeeId") Long employeeId);
+
+    @Delete("DELETE FROM employee_role WHERE employee_id = #{employeeId}")
+    int deleteEmployeeRolesByEmployeeId(@Param("employeeId") Long employeeId);
+
+    @Insert("INSERT INTO employee_role(employee_id, role_id) VALUES(#{employeeId}, #{roleId})")
+    int insertEmployeeRoleId(@Param("employeeId") Long employeeId, @Param("roleId") Long roleId);
 }

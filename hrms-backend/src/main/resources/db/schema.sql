@@ -98,3 +98,18 @@ INSERT IGNORE INTO role_permission (role_id, permission_id) VALUES
     (3, 1), (3, 4);                   -- EMPLOYEE：查看员工、查看部门
 
 -- 说明：登录账号（admin/hr/user）由 DataInitializer 在启动时创建，密码经 BCrypt 加密后入库
+
+-- 审计日志表
+CREATE TABLE IF NOT EXISTS sys_log (
+    id          BIGINT       NOT NULL AUTO_INCREMENT COMMENT '日志ID',
+    username    VARCHAR(64)           DEFAULT NULL COMMENT '操作人',
+    operation   VARCHAR(128)          DEFAULT NULL COMMENT '操作描述',
+    method      VARCHAR(255)          DEFAULT NULL COMMENT '方法名',
+    params      TEXT                  DEFAULT NULL COMMENT '请求参数（已脱敏）',
+    ip          VARCHAR(64)           DEFAULT NULL COMMENT 'IP 地址',
+    status      TINYINT               DEFAULT 1 COMMENT '1成功 0失败',
+    cost_time   BIGINT                DEFAULT NULL COMMENT '耗时（毫秒）',
+    create_time DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '操作时间',
+    PRIMARY KEY (id),
+    KEY idx_username (username)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COMMENT = '审计日志表';

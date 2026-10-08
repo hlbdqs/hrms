@@ -1,9 +1,10 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getEmployeePage, createEmployee, updateEmployee, deleteEmployee } from '../api/employee'
+import { getEmployeePage, createEmployee, updateEmployee, deleteEmployee, getEmployeeRoles, assignEmployeeRoles, resetEmployeePassword, exportEmployees, importEmployees } from '../api/employee'
 import { getDepartments } from '../api/department'
-import { hasAuthority } from '../utils/auth'
+import { listRoles } from '../api/role'
+import { hasAuthority, isAdmin } from '../utils/auth'
 
 const keyword = ref('')
 const filterDepartmentId = ref(null)
@@ -14,6 +15,12 @@ const list = ref([])
 const loading = ref(false)
 const canWrite = hasAuthority('employee:write')
 const canDelete = hasAuthority('employee:delete')
+const admin = isAdmin()
+
+const roles = ref([])
+const pwdDialogVisible = ref(false)
+const pwdForm = reactive({ id: null, name: '', newPassword: '' })
+const fileInput = ref(null)
 
 const departments = ref([])
 const deptMap = computed(() => {
@@ -34,7 +41,8 @@ const form = reactive({
   phone: '',
   email: '',
   departmentId: null,
-  status: 1
+  status: 1,
+  roleIds: []
 })
 
 const genderMap = { 0: '未知', 1: '男', 2: '女' }
@@ -64,6 +72,13 @@ async function loadDepartments() {
   }
 }
 
+async function loadRoles() {
+  const res = await listRoles()
+  if (res.code === 200) {
+    roles.value = res.data
+  }
+}
+
 function handleSearch() {
   page.value = 1
   loadData()
@@ -86,12 +101,13 @@ function openCreate() {
     phone: '',
     email: '',
     departmentId: null,
-    status: 1
+    status: 1,
+    roleIds: []
   })
   dialogVisible.value = true
 }
 
-function openEdit(row) {
+async function openEdit(row) {
   dialogTitle.value = '编辑员工'
   Object.assign(form, {
     id: row.id,
@@ -101,8 +117,15 @@ function openEdit(row) {
     phone: row.phone,
     email: row.email,
     departmentId: row.departmentId,
-    status: row.status
+    status: row.status,
+    roleIds: []
   })
+  if (admin) {
+    const r = await getEmployeeRoles(row.id)
+    if (r.code === 200) {
+      form.roleIds = r.data
+    }
+  }
   dialogVisible.value = true
 }
 
@@ -110,6 +133,10 @@ async function handleSubmit() {
   try {
     const res = form.id ? await updateEmployee(form.id, form) : await createEmployee(form)
     if (res.code === 200) {
+      const empId = form.id || res.data.id
+      if (admin) {
+        await assignEmployeeRoles(empId, form.roleIds || [])
+      }
       ElMessage.success('保存成功')
       dialogVisible.value = false
       loadData()
@@ -140,9 +167,76 @@ async function handleDelete(row) {
   }
 }
 
+function openResetPassword(row) {
+  pwdForm.id = row.id
+  pwdForm.name = row.name
+  pwdForm.newPassword = ''
+  pwdDialogVisible.value = true
+}
+
+async function handleResetPassword() {
+  if (!pwdForm.newPassword || pwdForm.newPassword.length < 6) {
+    ElMessage.warning('新密码至少 6 位')
+    return
+  }
+  try {
+    const res = await resetEmployeePassword(pwdForm.id, { newPassword: pwdForm.newPassword })
+    if (res.code === 200) {
+      ElMessage.success('密码已重置')
+      pwdDialogVisible.value = false
+    } else {
+      ElMessage.error(res.message || '重置失败')
+    }
+  } catch (e) {
+    ElMessage.error(e.message || '重置失败')
+  }
+}
+
+async function handleExport() {
+  try {
+    const blob = await exportEmployees()
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = '员工列表.xlsx'
+    a.click()
+    window.URL.revokeObjectURL(url)
+    ElMessage.success('导出成功')
+  } catch (e) {
+    ElMessage.error(e.message || '导出失败')
+  }
+}
+
+function triggerImport() {
+  fileInput.value.click()
+}
+
+async function handleImportFile(e) {
+  const file = e.target.files[0]
+  if (!file) {
+    return
+  }
+  try {
+    const res = await importEmployees(file)
+    if (res.code === 200) {
+      ElMessage.success(`导入完成：成功 ${res.data.success} 条，失败 ${res.data.fail} 条`)
+      loadData()
+    } else {
+      ElMessage.error(res.message || '导入失败')
+    }
+  } catch (err) {
+    ElMessage.error(err.message || '导入失败')
+  } finally {
+    e.target.value = ''
+  }
+}
+
 onMounted(() => {
   loadData()
   loadDepartments()
+  if (admin) {
+    loadRoles()
+  }
 })
 </script>
 
@@ -170,6 +264,9 @@ onMounted(() => {
         <el-button @click="handleReset">重置</el-button>
         <div class="spacer"></div>
         <el-button v-if="canWrite" type="success" @click="openCreate">新增员工</el-button>
+        <el-button @click="handleExport">导出</el-button>
+        <el-button v-if="canWrite" @click="triggerImport">导入</el-button>
+        <input ref="fileInput" type="file" accept=".xlsx,.xls" style="display: none" @change="handleImportFile" />
       </div>
 
       <el-table :data="list" v-loading="loading" border stripe>
@@ -188,10 +285,11 @@ onMounted(() => {
             <el-tag :type="row.status === 1 ? 'success' : 'info'">{{ statusMap[row.status] }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column v-if="canWrite || canDelete" label="操作" width="150" fixed="right">
+        <el-table-column v-if="canWrite || canDelete" label="操作" width="230" fixed="right">
           <template #default="{ row }">
             <el-button v-if="canWrite" link type="primary" @click="openEdit(row)">编辑</el-button>
             <el-button v-if="canDelete" link type="danger" @click="handleDelete(row)">删除</el-button>
+            <el-button v-if="admin" link type="warning" @click="openResetPassword(row)">重置密码</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -235,6 +333,11 @@ onMounted(() => {
             <el-option v-for="d in departments" :key="d.id" :label="d.name" :value="d.id" />
           </el-select>
         </el-form-item>
+        <el-form-item v-if="admin" label="角色">
+          <el-select v-model="form.roleIds" multiple clearable style="width: 100%">
+            <el-option v-for="r in roles" :key="r.id" :label="r.name" :value="r.id" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="状态">
           <el-radio-group v-model="form.status">
             <el-radio :value="1">在职</el-radio>
@@ -245,6 +348,19 @@ onMounted(() => {
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
         <el-button type="primary" @click="handleSubmit">保存</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog v-model="pwdDialogVisible" title="重置密码" width="400px">
+      <p style="margin-bottom: 12px">为员工「{{ pwdForm.name }}」设置新密码：</p>
+      <el-form label-width="80px">
+        <el-form-item label="新密码">
+          <el-input v-model="pwdForm.newPassword" type="password" show-password placeholder="至少 6 位" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="pwdDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="handleResetPassword">确定</el-button>
       </template>
     </el-dialog>
   </div>

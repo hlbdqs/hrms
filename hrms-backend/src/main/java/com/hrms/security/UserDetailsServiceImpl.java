@@ -33,6 +33,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         if (employee == null) {
             throw new UsernameNotFoundException("用户不存在：" + username);
         }
+        boolean enabled = employee.getStatus() == null || employee.getStatus() == 1;
 
         List<SimpleGrantedAuthority> authorities = new ArrayList<>();
         // 角色 -> ROLE_ 前缀
@@ -44,6 +45,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             authorities.add(new SimpleGrantedAuthority(perm));
         }
 
-        return new User(employee.getUsername(), employee.getPassword(), authorities);
+        return new User(employee.getUsername(), employee.getPassword(), enabled, true, true, true, authorities);
     }
 }

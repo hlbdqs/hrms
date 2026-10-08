@@ -1,5 +1,6 @@
 package com.hrms.controller;
 
+import com.hrms.common.Log;
 import com.hrms.common.Result;
 import com.hrms.entity.SysRole;
 import com.hrms.service.RoleService;
@@ -40,18 +41,21 @@ public class RoleController {
         return Result.ok(roleService.getPermissionIds(id));
     }
 
+    @Log("新增角色")
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public Result<SysRole> create(@RequestBody SysRole role) {
         return Result.ok(roleService.create(role));
     }
 
+    @Log("修改角色")
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public Result<SysRole> update(@PathVariable Long id, @RequestBody SysRole role) {
         return Result.ok(roleService.update(id, role));
     }
 
+    @Log("删除角色")
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public Result<Void> delete(@PathVariable Long id) {
@@ -59,6 +63,7 @@ public class RoleController {
         return Result.ok();
     }
 
+    @Log("分配权限")
     @PutMapping("/{id}/permissions")
     @PreAuthorize("hasRole('ADMIN')")
     public Result<Void> assignPermissions(@PathVariable Long id, @RequestBody List<Long> permissionIds) {

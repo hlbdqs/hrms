@@ -3,9 +3,12 @@ package com.hrms.service.impl;
 import com.hrms.common.BusinessException;
 import com.hrms.common.PageResult;
 import com.hrms.entity.Employee;
+import com.hrms.mapper.AuthMapper;
 import com.hrms.mapper.EmployeeMapper;
 import com.hrms.service.EmployeeService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -16,9 +19,13 @@ import java.util.List;
 public class EmployeeServiceImpl implements EmployeeService {
 
     private final EmployeeMapper employeeMapper;
+    private final AuthMapper authMapper;
+    private final PasswordEncoder passwordEncoder;
 
-    public EmployeeServiceImpl(EmployeeMapper employeeMapper) {
+    public EmployeeServiceImpl(EmployeeMapper employeeMapper, AuthMapper authMapper, PasswordEncoder passwordEncoder) {
         this.employeeMapper = employeeMapper;
+        this.authMapper = authMapper;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -65,5 +72,29 @@ public class EmployeeServiceImpl implements EmployeeService {
     public void delete(Long id) {
         getById(id);
         employeeMapper.deleteById(id);
+    }
+
+    @Override
+    public List<Long> getRoleIds(Long id) {
+        getById(id);
+        return authMapper.selectRoleIdsByEmployeeId(id);
+    }
+
+    @Override
+    @Transactional
+    public void assignRoles(Long id, List<Long> roleIds) {
+        getById(id);
+        authMapper.deleteEmployeeRolesByEmployeeId(id);
+        if (roleIds != null) {
+            for (Long roleId : roleIds) {
+                authMapper.insertEmployeeRoleId(id, roleId);
+            }
+        }
+    }
+
+    @Override
+    public void resetPassword(Long id, String newPassword) {
+        getById(id);
+        employeeMapper.updatePassword(id, passwordEncoder.encode(newPassword));
     }
 }
