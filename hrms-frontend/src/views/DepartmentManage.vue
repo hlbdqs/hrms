@@ -2,12 +2,14 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getDepartments, createDepartment, updateDepartment, deleteDepartment } from '../api/department'
+import { hasAuthority } from '../utils/auth'
 
 const list = ref([])
 const loading = ref(false)
 const dialogVisible = ref(false)
 const dialogTitle = ref('新增部门')
 const form = reactive({ id: null, name: '', description: '' })
+const canWrite = hasAuthority('employee:write')
 
 async function loadData() {
   loading.value = true
@@ -80,14 +82,14 @@ onMounted(loadData)
       <div class="toolbar">
         <span class="title">部门列表</span>
         <div class="spacer"></div>
-        <el-button type="success" @click="openCreate">新增部门</el-button>
+        <el-button v-if="canWrite" type="success" @click="openCreate">新增部门</el-button>
       </div>
 
       <el-table :data="list" v-loading="loading" border stripe>
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="name" label="部门名称" width="180" />
         <el-table-column prop="description" label="描述" min-width="240" />
-        <el-table-column label="操作" width="150" fixed="right">
+        <el-table-column v-if="canWrite" label="操作" width="150" fixed="right">
           <template #default="{ row }">
             <el-button link type="primary" @click="openEdit(row)">编辑</el-button>
             <el-button link type="danger" @click="handleDelete(row)">删除</el-button>

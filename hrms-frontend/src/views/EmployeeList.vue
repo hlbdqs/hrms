@@ -3,6 +3,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getEmployeePage, createEmployee, updateEmployee, deleteEmployee } from '../api/employee'
 import { getDepartments } from '../api/department'
+import { hasAuthority } from '../utils/auth'
 
 const keyword = ref('')
 const filterDepartmentId = ref(null)
@@ -11,6 +12,8 @@ const size = ref(10)
 const total = ref(0)
 const list = ref([])
 const loading = ref(false)
+const canWrite = hasAuthority('employee:write')
+const canDelete = hasAuthority('employee:delete')
 
 const departments = ref([])
 const deptMap = computed(() => {
@@ -166,7 +169,7 @@ onMounted(() => {
         <el-button type="primary" @click="handleSearch">查询</el-button>
         <el-button @click="handleReset">重置</el-button>
         <div class="spacer"></div>
-        <el-button type="success" @click="openCreate">新增员工</el-button>
+        <el-button v-if="canWrite" type="success" @click="openCreate">新增员工</el-button>
       </div>
 
       <el-table :data="list" v-loading="loading" border stripe>
@@ -185,10 +188,10 @@ onMounted(() => {
             <el-tag :type="row.status === 1 ? 'success' : 'info'">{{ statusMap[row.status] }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="150" fixed="right">
+        <el-table-column v-if="canWrite || canDelete" label="操作" width="150" fixed="right">
           <template #default="{ row }">
-            <el-button link type="primary" @click="openEdit(row)">编辑</el-button>
-            <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
+            <el-button v-if="canWrite" link type="primary" @click="openEdit(row)">编辑</el-button>
+            <el-button v-if="canDelete" link type="danger" @click="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
